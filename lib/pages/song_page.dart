@@ -112,9 +112,29 @@ class SongPage extends StatelessWidget {
                             // START TIME
                             Text(formatTime(value.currentDuration)),
                             // SHUFFLE ICON
-                            const Icon(Icons.shuffle),
+                            IconButton(
+                              icon: value.isShuffle
+                                  ? const Icon(
+                                      Icons.shuffle_on_rounded,
+                                      color: Colors.amber,
+                                    )
+                                  : const Icon(
+                                      Icons.shuffle,
+                                    ),
+                              onPressed: value.toggleShuffle,
+                            ),
                             // REPEAT ICON
-                            const Icon(Icons.repeat),
+                            IconButton(
+                              icon: value.isRepeat
+                                  ? const Icon(
+                                      Icons.repeat_one_on_rounded,
+                                      color: Colors.amber,
+                                    )
+                                  : const Icon(
+                                      Icons.repeat,
+                                    ),
+                              onPressed: value.toggleRepeat,
+                            ),
                             // END TIME
                             Text(formatTime(value.totalDuration)),
                           ],

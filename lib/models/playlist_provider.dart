@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:minimal_music_player/models/song.dart';
@@ -83,6 +85,12 @@ class PlaylistProvider extends ChangeNotifier {
   /// Initially not Playing
   bool _isPlaying = false;
 
+  /// Is Repeat?
+  bool _isRepeat = false;
+
+  /// Is Repeat?
+  bool _isShuffle = false;
+
   /// Play the song
   void play() async {
     // Lấy đường dẫn bài hát hiện tại đang chọn
@@ -133,16 +141,23 @@ class PlaylistProvider extends ChangeNotifier {
   void playNextSong() {
     // Nếu bài hát hiện tại đang có
     if (_currentSongIndex != null) {
-      if (_currentSongIndex! < _playlist.length - 1) {
-        // Đến bài tiếp theo, nếu chưa phải là bài cuối cùng
-        _currentSongIndex = _currentSongIndex! + 1;
-      } else {
-        // Nếu là bài cuối cùng, quay lại bài hát đầu tiên
-        _currentSongIndex = 0;
+      // Nếu có bật chế độ phát ngẫu nhiên thì chọn ngẫu nhiên để phát
+      if (_isShuffle) {
+        chosenRadomSong();
       }
+      // Ngược lại thì phát bài tiếp theo
+      else {
+        if (_currentSongIndex! < _playlist.length - 1) {
+          // Đến bài tiếp theo, nếu chưa phải là bài cuối cùng
+          _currentSongIndex = _currentSongIndex! + 1;
+        } else {
+          // Nếu là bài cuối cùng, quay lại bài hát đầu tiên
+          _currentSongIndex = 0;
+        }
+      }
+      // Cho phát nhạc
+      play();
     }
-    // Cho phát nhạc
-    play();
   }
 
   /// Play Previous Song
@@ -151,18 +166,33 @@ class PlaylistProvider extends ChangeNotifier {
     if (_currentDuration.inSeconds > 2) {
       seek(Duration.zero);
     }
-    // Ngược lại cho quay về bài trước
+    // Ngược lại, nếu có bật chế độ ngẫu nhiên thì chọn ngẫu nhiên để phát
     else {
-      if (_currentSongIndex! > 0) {
-        // Quay về bài trước, nếu chưa phải là bài đầu tiên
-        _currentSongIndex = _currentSongIndex! - 1;
-      } else {
-        // Nếu là bài đầu tiên, quay lại bài hát cuối cùng
-        _currentSongIndex = _playlist.length - 1;
+      if (_isShuffle) {
+        chosenRadomSong();
+      }
+      // Ngược lại thì cho quay lại phát bài trước đó
+      else {
+        if (_currentSongIndex! > 0) {
+          // Quay về bài trước, nếu chưa phải là bài đầu tiên
+          _currentSongIndex = _currentSongIndex! - 1;
+        } else {
+          // Nếu là bài đầu tiên, quay lại bài hát cuối cùng
+          _currentSongIndex = _playlist.length - 1;
+        }
       }
       // Cho phát nhạc
       play();
     }
+  }
+
+  /// Chọn bài ngẫu nhiên
+  void chosenRadomSong() {
+    int random;
+    do {
+      random = Random().nextInt(_playlist.length);
+    } while (_currentSongIndex == random);
+    _currentSongIndex = random;
   }
 
   /// Listen to Duration
@@ -183,9 +213,20 @@ class PlaylistProvider extends ChangeNotifier {
 
     // Lắng nghe khi hoàn thành bài hát
     _audioPlayer.onPlayerComplete.listen((event) {
-      // Cho phát bài tiếp theo
-      playNextSong();
+      // Nếu chế độ lặp lại đang bật, cho phát lại
+      // Ngược lại cho phát bài tiếp theo
+      _isRepeat ? play() : playNextSong();
     });
+  }
+
+  /// Bật hoặc Tắt chế độ phát lại nhạc
+  void toggleRepeat() {
+    _isRepeat = !_isRepeat;
+  }
+
+  /// Bật hoặc Tắt chế độ phát ngẫu nhiên
+  void toggleShuffle() {
+    _isShuffle = !_isShuffle;
   }
 
   /// Dispose Audio Player
@@ -200,6 +241,12 @@ class PlaylistProvider extends ChangeNotifier {
 
   /// Cho biết có đang phát nhạc hay ko?
   bool get isPlaying => _isPlaying;
+
+  /// Cho biết có đang chọn phát lại hay ko?
+  bool get isRepeat => _isRepeat;
+
+  /// Cho biết có đang chọn phát ngẫu nhiên hay ko?
+  bool get isShuffle => _isShuffle;
 
   /// Cho biết tổng thời lượng của bài hát hiện tại
   Duration get totalDuration => _totalDuration;

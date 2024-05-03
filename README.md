@@ -7,6 +7,8 @@
 > - Tuỳ chọn chế độ hiển thị "Light Mode", "Dark Mode".
 > - Phát nhạc: play (pause/resume), next, previous.
 > - Tự động phát bài tiếp theo khi hết bài.
+> - Chế độ phát ngẫu nhiên.
+> - Chế độ phát lặp lại.
 
 ## Hình ảnh:
 
